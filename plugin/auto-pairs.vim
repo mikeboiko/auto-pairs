@@ -359,7 +359,7 @@ function! AutoPairsMap(key)
   end
   let escaped_key = substitute(key, "'", "''", 'g')
   " use expr will cause search() doesn't work
-  execute 'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<CR>"
+  execute 'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<s-CR>"
 
 endfunction
 
@@ -377,7 +377,7 @@ endfunction
 function! AutoPairsMoveCharacter(key)
   let c = getline(".")[col(".")-1]
   let escaped_key = substitute(a:key, "'", "''", 'g')
-  return "\<DEL>\<ESC>:call search("."'".escaped_key."'".")\<CR>a".c."\<LEFT>"
+  return "\<DEL>\<ESC>:call search("."'".escaped_key."'".")\<s-CR>a".c."\<LEFT>"
 endfunction
 
 function! AutoPairsReturn()
@@ -460,17 +460,17 @@ function! AutoPairsInit()
 
   for key in split(b:AutoPairsMoveCharacter, '\s*')
     let escaped_key = substitute(key, "'", "''", 'g')
-    execute 'inoremap <silent> <buffer> <M-'.key."> <C-R>=AutoPairsMoveCharacter('".escaped_key."')<CR>"
+    execute 'inoremap <silent> <buffer> <M-'.key."> <C-R>=AutoPairsMoveCharacter('".escaped_key."')<s-CR>"
   endfor
 
   " Still use <buffer> level mapping for <BS> <SPACE>
   if g:AutoPairsMapBS
     " Use <C-R> instead of <expr> for issue #14 sometimes press BS output strange words
-    execute 'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
+    execute 'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<s-CR>'
   end
 
   if g:AutoPairsMapCh
-    execute 'inoremap <buffer> <silent> <C-h> <C-R>=AutoPairsDelete()<CR>'
+    execute 'inoremap <buffer> <silent> <C-h> <C-R>=AutoPairsDelete()<s-CR>'
   endif
 
   if g:AutoPairsMapSpace
@@ -479,26 +479,26 @@ function! AutoPairsInit()
     if v:version == 703 && has("patch489") || v:version > 703
       let do_abbrev = "<C-]>"
     endif
-    execute 'inoremap <buffer> <silent> <SPACE> '.do_abbrev.'<C-R>=AutoPairsSpace()<CR>'
+    execute 'inoremap <buffer> <silent> <SPACE> '.do_abbrev.'<C-R>=AutoPairsSpace()<s-CR>'
   end
 
   if g:AutoPairsShortcutFastWrap != ''
-    execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutFastWrap.' <C-R>=AutoPairsFastWrap()<CR>'
+    execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutFastWrap.' <C-R>=AutoPairsFastWrap()<s-CR>'
   end
 
   if g:AutoPairsShortcutBackInsert != ''
-    execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutBackInsert.' <C-R>=AutoPairsBackInsert()<CR>'
+    execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutBackInsert.' <C-R>=AutoPairsBackInsert()<s-CR>'
   end
 
   if g:AutoPairsShortcutToggle != ''
     " use <expr> to ensure showing the status when toggle
     execute 'inoremap <buffer> <silent> <expr> '.g:AutoPairsShortcutToggle.' AutoPairsToggle()'
-    execute 'noremap <buffer> <silent> '.g:AutoPairsShortcutToggle.' :call AutoPairsToggle()<CR>'
+    execute 'noremap <buffer> <silent> '.g:AutoPairsShortcutToggle.' :call AutoPairsToggle()<s-CR>'
   end
 
   if g:AutoPairsShortcutJump != ''
-    execute 'inoremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' <ESC>:call AutoPairsJump()<CR>a'
-    execute 'noremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' :call AutoPairsJump()<CR>'
+    execute 'inoremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' <ESC>:call AutoPairsJump()<s-CR>a'
+    execute 'noremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' :call AutoPairsJump()<s-CR>'
   end
 
 endfunction
@@ -531,9 +531,9 @@ function! AutoPairsTryInit()
     if v:version == 703 && has('patch32') || v:version > 703
       " VIM 7.3 supports advancer maparg which could get <expr> info
       " then auto-pairs could remap <CR> in any case.
-      let info = maparg('<CR>', 'i', 0, 1)
+      let info = maparg('<s-CR>', 'i', 0, 1)
       if empty(info)
-        let old_cr = '<CR>'
+        let old_cr = '<s-CR>'
         let is_expr = 0
       else
         let old_cr = info['rhs']
@@ -546,9 +546,9 @@ function! AutoPairsTryInit()
       " VIM version less than 7.3
       " the mapping's <expr> info is lost, so guess it is expr or not, it's
       " not accurate.
-      let old_cr = maparg('<CR>', 'i')
+      let old_cr = maparg('<s-CR>', 'i')
       if old_cr == ''
-        let old_cr = '<CR>'
+        let old_cr = '<s-CR>'
         let is_expr = 0
       else
         let old_cr = s:ExpandMap(old_cr)
@@ -568,14 +568,14 @@ function! AutoPairsTryInit()
         let old_cr = wrapper_name
       end
       " Always silent mapping
-      execute 'inoremap <script> <buffer> <silent> <CR> '.old_cr.'<SID>AutoPairsReturn'
+      execute 'inoremap <script> <buffer> <silent> <s-CR> '.old_cr.'<SID>AutoPairsReturn'
     end
   endif
   call AutoPairsInit()
 endfunction
 
 " Always silent the command
-inoremap <silent> <SID>AutoPairsReturn <C-R>=AutoPairsReturn()<CR>
+inoremap <silent> <SID>AutoPairsReturn <C-R>=AutoPairsReturn()<s-CR>
 imap <script> <Plug>AutoPairsReturn <SID>AutoPairsReturn
 
 
